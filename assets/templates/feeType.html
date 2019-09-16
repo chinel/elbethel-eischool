@@ -1,0 +1,747 @@
+<div class="row page-titles">
+    <div class="col-md-6 col-8 align-self-center">
+        <h3 class="text-themecolor m-b-0 m-t-0">{{phrase.FeeTypes}}</h3>
+    </div>
+    <div class="col-md-6 col-4 align-self-center">
+
+    </div>
+</div>
+
+<div class="row" ng-show="views.list">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-block">
+                <button ng-show="$root.can('FeeTypes.addFeeType')" ng-click="changeView('add')" class="btn pull-right btn-success card-block-input-item">{{phrase.addFeeType}}</button>
+                <div class="pull-right card-block-input-group card-block-input-item">
+                    <div class="input-group input-group-sm">
+                        <input type="text" name="table_search" ng-model="searchText" placeholder="{{phrase.Search}}" class="form-control">
+                        <span class="input-group-addon"><i class="fa fa-search"></i></span>
+                    </div>
+                </div>
+                <h4 class="card-title">{{phrase.listFeeType}}</h4>
+                <div class="table-responsive">
+
+                    <table class="table table-bordered table-hover">
+                        <tbody>
+                            <tr>
+                                <th>{{phrase.FeeType}}</th>
+                                <th>{{phrase.feeCode}}</th>
+                                <th>{{phrase.feeDescription}}</th>
+                                <th ng-show="$root.can('FeeTypes.editFeeType') || $root.can('FeeTypes.delFeeType')">{{phrase.Operations}}</th>
+                            </tr>
+                            <tr ng-repeat="type in feeTypes | filter:searchText">
+                                <td>{{type.feeTitle}}</td>
+                                <td>{{type.feeCode}}</td>
+                                <td>{{type.feeDescription}}</td>
+                                <td ng-show="$root.can('FeeTypes.editFeeType') || $root.can('FeeTypes.delFeeType')">
+                                    <button ng-show="$root.can('FeeTypes.editFeeType')" ng-click="edit(type.id)" type="button" class="btn btn-info btn-circle" title="{{phrase.Edit}}" tooltip><i class="fa fa-pencil"></i></button>
+                                    <button ng-show="$root.can('FeeTypes.delFeeType')" ng-click="remove(type,$index)" type="button" class="btn btn-danger btn-circle" title="{{phrase.Remove}}" tooltip><i class="fa fa-trash-o"></i></button>
+                                </td>
+                            </tr>
+                            <tr ng-show="!feeTypes.length"><td class="noTableData" colspan="4">{{phrase.noFeeTypesAv}}</td></tr>
+                        </tbody>
+                    </table>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row" ng-show="views.add">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-block">
+                <button ng-click="changeView('list')" class="btn btn-danger btn-flat pull-right card-block-input-item">{{phrase.cancelAdd}}</button>
+                <h4 class="card-title">{{phrase.addFeeType}}</h4>
+                <div class="table-responsive">
+
+                    <form class="form-horizontal" name="addGrade" role="form" ng-submit="saveAdd()" novalidate>
+                        <div class="form-group row" ng-class="{'has-error': addGrade.feeTitle.$invalid}">
+                            <label class="col-sm-2 text-right control-label col-form-label">{{phrase.feeTypeTitle}} * </label>
+                            <div class="col-sm-10">
+                                <input type="text" name="feeTitle" ng-model="form.feeTitle" class="form-control" required placeholder="{{phrase.feeTypeTitle}}">
+                            </div>
+                        </div>
+                        <div class="form-group row" ng-class="{'has-error': addGrade.feeGroup.$invalid}">
+                            <label class="col-sm-2 text-right control-label col-form-label">{{phrase.groupTitle}} * </label>
+                            <div class="col-sm-10">
+                                <select class="form-control" ng-model="form.feeGroup" name="feeGroup" required>
+                                    <option ng-repeat="group in feeGroups" value="{{group.id}}">{{group.group_title}}</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <label class="col-sm-2 text-right control-label col-form-label">{{phrase.feeCode}}</label>
+                            <div class="col-sm-10">
+                                <input type="text" name="feeCode" ng-model="form.feeCode" class="form-control" placeholder="{{phrase.feeCode}}">
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <label class="col-sm-2 text-right control-label col-form-label">{{phrase.feeDescription}}</label>
+                            <div class="col-sm-10">
+                                <textarea name="feeDescription" class="form-control" ng-model="form.feeDescription" placeholder="{{phrase.feeDescription}}"></textarea>
+                            </div>
+                        </div>
+                        <div class="form-group row" ng-class="{'has-error': addGrade.feeAmount.$invalid}">
+                            <label class="col-sm-2 text-right control-label col-form-label">{{phrase.feeAmount}}</label>
+                            <div class="col-sm-10">
+                                <input type="text" name="feeAmount" ng-model="form.feeAmount" required class="form-control" placeholder="{{phrase.feeAmount}}">
+                            </div>
+                        </div>
+                        <div class="form-group row" ng-class="{'has-error': addGrade.feeSchType.$invalid}">
+                            <label class="col-sm-2 text-right control-label col-form-label">{{phrase.feeSchedule}}</label>
+                            <div class="col-sm-10">
+                                <div class="radio-list">
+                                    <label>
+                                        <input type="radio" ng-model="form.feeSchType" required value="na" ng-click="chgFeeSchType('nothing')"> N/A
+                                    </label>
+                                </div>
+                                <div class="radio-list">
+                                    <label>
+                                        <input type="radio" ng-model="form.feeSchType" required value="onetime" ng-click="chgFeeSchType('first')"> {{phrase.feeScheduleOneTime}}
+                                    </label>
+                                </div>
+                                <div class="radio-list">
+                                    <label>
+                                        <input type="radio" ng-model="form.feeSchType" required value="annually" ng-click="chgFeeSchType('first')"> {{phrase.feeScheduleAnnually}}
+                                    </label>
+                                </div>
+                                <div class="radio-list">
+                                    <label>
+                                        <input type="radio" ng-model="form.feeSchType" required value="biannually" ng-click="chgFeeSchType('second')"> {{phrase.feeScheduleBiAnnually}}
+                                    </label>
+                                </div>
+                                <div class="radio-list">
+                                    <label>
+                                        <input type="radio" ng-model="form.feeSchType" required value="triannually" ng-click="chgFeeSchType('third')">  {{phrase.feeScheduleTriAnnually}}
+                                    </label>
+                                </div>
+                                <div class="radio-list">
+                                    <label>
+                                        <input type="radio" ng-model="form.feeSchType" required value="quarterly" ng-click="chgFeeSchType('fourth')"> {{phrase.feeScheduleQuarterly}}
+                                    </label>
+                                </div>
+                                <div class="radio-list">
+                                    <label>
+                                        <input type="radio" ng-model="form.feeSchType" required value="monthly" ng-click="chgFeeSchType('twelvth')"> {{phrase.feeScheduleMonthly}}
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card card-outline-info" style="border: 1px solid #009efb;" ng-show="form.feeSchType" ng-class="{'has-error': addGrade.feeSchDetails.$invalid}">
+                            <div class="card-header">
+                                <h4 class="m-b-0 text-white">{{phrase.feeSchedule}}</h4>
+                            </div>
+                            <div class="card-block">
+                                <p class="card-text text-center">{{phrase.feeScheduleGenerateInvoice}}:</p>
+
+                                <div class="form-group row" ng-show="form.feeSchType == 'onetime'">
+                                    <label class="col-sm-2 text-right control-label col-form-label">{{phrase.feeScheduleFixedDate}}</label>
+                                    <div class="col-sm-4">
+                                        <input type="text" name="feeSchDetails" date-picker ng-model="form.feeSchDetails.first.date" ng-required="form.feeSchType == 'onetime'" class="form-control datemask" id="datemask">
+                                    </div>
+                                    <label class="col-sm-2 text-right control-label col-form-label">{{phrase.dueDate}}</label>
+                                    <div class="col-sm-4">
+                                        <input type="text" name="feeSchDetails" date-picker ng-model="form.feeSchDetails.first.due" ng-required="form.feeSchType == 'onetime'" class="form-control datemask" id="datemaskdue">
+                                    </div>
+                                </div>
+
+                                <div ng-show="form.feeSchType == 'annually'">
+                                    <div class="form-group row">
+                                        <label class="col-sm-2 text-right control-label col-form-label">{{phrase.feeScheduleFirstDate}}</label>
+                                        <div class="col-sm-4">
+                                            <input type="text" name="feeSchDetails" date-picker ng-model="form.feeSchDetails.first.date" ng-required="form.feeSchType == 'annually'" class="form-control datemask" id="datemask1">
+                                        </div>
+                                        <label class="col-sm-2 text-right control-label col-form-label">{{phrase.dueDate}}</label>
+                                        <div class="col-sm-4">
+                                            <input type="text" name="feeSchDetails" date-picker ng-model="form.feeSchDetails.first.due" ng-required="form.feeSchType == 'annually'" class="form-control datemask" id="datemask1Due">
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div ng-show="form.feeSchType == 'biannually'">
+                                    <div class="form-group row">
+                                        <label class="col-sm-2 text-right control-label col-form-label">{{phrase.feeScheduleFirstDate}}</label>
+                                        <div class="col-sm-4">
+                                            <input type="text" name="feeSchDetails" date-picker ng-model="form.feeSchDetails.first.date" ng-required="form.feeSchType == 'biannually'" class="form-control datemask" id="datemask2">
+                                        </div>
+                                        <label class="col-sm-2 text-right control-label col-form-label">{{phrase.dueDate}}</label>
+                                        <div class="col-sm-4">
+                                            <input type="text" name="feeSchDetails" date-picker ng-model="form.feeSchDetails.first.due" ng-required="form.feeSchType == 'biannually'" class="form-control datemask" id="datemask2Due">
+                                        </div>
+                                    </div>
+                                    <div class="form-group row">
+                                        <label class="col-sm-2 text-right control-label col-form-label">{{phrase.feeScheduleSecondDate}}</label>
+                                        <div class="col-sm-4">
+                                            <input type="text" name="feeSchDetails" date-picker ng-model="form.feeSchDetails.second.date" ng-required="form.feeSchType == 'biannually'" class="form-control datemask" id="datemask3">
+                                        </div>
+                                        <label class="col-sm-2 text-right control-label col-form-label">{{phrase.dueDate}}</label>
+                                        <div class="col-sm-4">
+                                            <input type="text" name="feeSchDetails" date-picker ng-model="form.feeSchDetails.second.due" ng-required="form.feeSchType == 'biannually'" class="form-control datemask" id="datemask3Due">
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div ng-show="form.feeSchType == 'triannually'">
+                                    <div class="form-group row">
+                                        <label class="col-sm-2 text-right control-label col-form-label">{{phrase.feeScheduleFirstDate}}</label>
+                                        <div class="col-sm-4">
+                                            <input type="text" name="feeSchDetails" date-picker ng-model="form.feeSchDetails.first.date" ng-required="form.feeSchType == 'triannually'" class="form-control datemask" id="datemask4">
+                                        </div>
+                                        <label class="col-sm-2 text-right control-label col-form-label">{{phrase.dueDate}}</label>
+                                        <div class="col-sm-4">
+                                            <input type="text" name="feeSchDetails" date-picker ng-model="form.feeSchDetails.first.due" ng-required="form.feeSchType == 'triannually'" class="form-control datemask" id="datemask4Due">
+                                        </div>
+                                    </div>
+                                    <div class="form-group row">
+                                        <label class="col-sm-2 text-right control-label col-form-label">{{phrase.feeScheduleSecondDate}}</label>
+                                        <div class="col-sm-4">
+                                            <input type="text" name="feeSchDetails" date-picker ng-model="form.feeSchDetails.second.date" ng-required="form.feeSchType == 'triannually'" class="form-control datemask" id="datemask5">
+                                        </div>
+                                        <label class="col-sm-2 text-right control-label col-form-label">{{phrase.dueDate}}</label>
+                                        <div class="col-sm-4">
+                                            <input type="text" name="feeSchDetails" date-picker ng-model="form.feeSchDetails.second.due" ng-required="form.feeSchType == 'triannually'" class="form-control datemask" id="datemask5Due">
+                                        </div>
+                                    </div>
+                                    <div class="form-group row">
+                                        <label class="col-sm-2 text-right control-label col-form-label">{{phrase.feeScheduleThirdDate}}</label>
+                                        <div class="col-sm-4">
+                                            <input type="text" name="feeSchDetails" date-picker ng-model="form.feeSchDetails.third.date" ng-required="form.feeSchType == 'triannually'" class="form-control datemask" id="datemask6">
+                                        </div>
+                                        <label class="col-sm-2 text-right control-label col-form-label">{{phrase.dueDate}}</label>
+                                        <div class="col-sm-4">
+                                            <input type="text" name="feeSchDetails" date-picker ng-model="form.feeSchDetails.third.due" ng-required="form.feeSchType == 'triannually'" class="form-control datemask" id="datemask6Due">
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div ng-show="form.feeSchType == 'quarterly'">
+                                    <div class="form-group row">
+                                        <label class="col-sm-2 text-right control-label col-form-label">{{phrase.feeScheduleFirstDate}}</label>
+                                        <div class="col-sm-4">
+                                            <input type="text" name="feeSchDetails" date-picker ng-model="form.feeSchDetails.first.date" ng-required="form.feeSchType == 'quarterly'" class="form-control datemask" id="datemask7">
+                                        </div>
+                                        <label class="col-sm-2 text-right control-label col-form-label">{{phrase.dueDate}}</label>
+                                        <div class="col-sm-4">
+                                            <input type="text" name="feeSchDetails" date-picker ng-model="form.feeSchDetails.first.due" ng-required="form.feeSchType == 'quarterly'" class="form-control datemask" id="datemask7Due">
+                                        </div>
+                                    </div>
+                                    <div class="form-group row">
+                                        <label class="col-sm-2 text-right control-label col-form-label">{{phrase.feeScheduleSecondDate}}</label>
+                                        <div class="col-sm-4">
+                                            <input type="text" name="feeSchDetails" date-picker ng-model="form.feeSchDetails.second.date" ng-required="form.feeSchType == 'quarterly'" class="form-control datemask" id="datemask8">
+                                        </div>
+                                        <label class="col-sm-2 text-right control-label col-form-label">{{phrase.dueDate}}</label>
+                                        <div class="col-sm-4">
+                                            <input type="text" name="feeSchDetails" date-picker ng-model="form.feeSchDetails.second.due" ng-required="form.feeSchType == 'quarterly'" class="form-control datemask" id="datemask8Due">
+                                        </div>
+                                    </div>
+                                    <div class="form-group row">
+                                        <label class="col-sm-2 text-right control-label col-form-label">{{phrase.feeScheduleThirdDate}}</label>
+                                        <div class="col-sm-4">
+                                            <input type="text" name="feeSchDetails" date-picker ng-model="form.feeSchDetails.third.date" ng-required="form.feeSchType == 'quarterly'" class="form-control datemask" id="datemask9">
+                                        </div>
+                                        <label class="col-sm-2 text-right control-label col-form-label">{{phrase.dueDate}}</label>
+                                        <div class="col-sm-4">
+                                            <input type="text" name="feeSchDetails" date-picker ng-model="form.feeSchDetails.third.due" ng-required="form.feeSchType == 'quarterly'" class="form-control datemask" id="datemask9Due">
+                                        </div>
+                                    </div>
+                                    <div class="form-group row">
+                                        <label class="col-sm-2 text-right control-label col-form-label">{{phrase.feeScheduleFourthDate}}</label>
+                                        <div class="col-sm-4">
+                                            <input type="text" name="feeSchDetails" date-picker ng-model="form.feeSchDetails.fourth.date" ng-required="form.feeSchType == 'quarterly'" class="form-control datemask" id="datemask10">
+                                        </div>
+                                        <label class="col-sm-2 text-right control-label col-form-label">{{phrase.dueDate}}</label>
+                                        <div class="col-sm-4">
+                                            <input type="text" name="feeSchDetails" date-picker ng-model="form.feeSchDetails.fourth.due" ng-required="form.feeSchType == 'quarterly'" class="form-control datemask" id="datemask10Due">
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div ng-show="form.feeSchType == 'monthly'">
+                                    <div class="form-group row">
+                                        <label class="col-sm-2 text-right control-label col-form-label">{{phrase.feeScheduleFirstDate}}</label>
+                                        <div class="col-sm-4">
+                                            <input type="text" name="feeSchDetails" date-picker ng-model="form.feeSchDetails.first.date" ng-required="form.feeSchType == 'monthly'" class="form-control datemask" id="datemask11">
+                                        </div>
+                                        <label class="col-sm-2 text-right control-label col-form-label">{{phrase.dueDate}}</label>
+                                        <div class="col-sm-4">
+                                            <input type="text" name="feeSchDetails" date-picker ng-model="form.feeSchDetails.first.due" ng-required="form.feeSchType == 'monthly'" class="form-control datemask" id="datemask11Due">
+                                        </div>
+                                    </div>
+                                    <div class="form-group row">
+                                        <label class="col-sm-2 text-right control-label col-form-label">{{phrase.feeScheduleSecondDate}}</label>
+                                        <div class="col-sm-4">
+                                            <input type="text" name="feeSchDetails" date-picker ng-model="form.feeSchDetails.second.date" ng-required="form.feeSchType == 'monthly'" class="form-control datemask" id="datemask12">
+                                        </div>
+                                        <label class="col-sm-2 text-right control-label col-form-label">{{phrase.dueDate}}</label>
+                                        <div class="col-sm-4">
+                                            <input type="text" name="feeSchDetails" date-picker ng-model="form.feeSchDetails.second.due" ng-required="form.feeSchType == 'monthly'" class="form-control datemask" id="datemask12Due">
+                                        </div>
+                                    </div>
+                                    <div class="form-group row">
+                                        <label class="col-sm-2 text-right control-label col-form-label">{{phrase.feeScheduleThirdDate}}</label>
+                                        <div class="col-sm-4">
+                                            <input type="text" name="feeSchDetails" date-picker ng-model="form.feeSchDetails.third.date" ng-required="form.feeSchType == 'monthly'" class="form-control datemask" id="datemask13">
+                                        </div>
+                                        <label class="col-sm-2 text-right control-label col-form-label">{{phrase.dueDate}}</label>
+                                        <div class="col-sm-4">
+                                            <input type="text" name="feeSchDetails" date-picker ng-model="form.feeSchDetails.third.due" ng-required="form.feeSchType == 'monthly'" class="form-control datemask" id="datemask13Due">
+                                        </div>
+                                    </div>
+                                    <div class="form-group row">
+                                        <label class="col-sm-2 text-right control-label col-form-label">{{phrase.feeScheduleFourthDate}}</label>
+                                        <div class="col-sm-4">
+                                            <input type="text" name="feeSchDetails" date-picker ng-model="form.feeSchDetails.fourth.date" ng-required="form.feeSchType == 'monthly'" class="form-control datemask" id="datemask14">
+                                        </div>
+                                        <label class="col-sm-2 text-right control-label col-form-label">{{phrase.dueDate}}</label>
+                                        <div class="col-sm-4">
+                                            <input type="text" name="feeSchDetails" date-picker ng-model="form.feeSchDetails.fourth.due" ng-required="form.feeSchType == 'monthly'" class="form-control datemask" id="datemask14Due">
+                                        </div>
+                                    </div>
+                                    <div class="form-group row">
+                                        <label class="col-sm-2 text-right control-label col-form-label">{{phrase.feeScheduleFifthDate}}</label>
+                                        <div class="col-sm-4">
+                                            <input type="text" name="feeSchDetails" date-picker ng-model="form.feeSchDetails.fifth.date" ng-required="form.feeSchType == 'monthly'" class="form-control datemask" id="datemask15">
+                                        </div>
+                                        <label class="col-sm-2 text-right control-label col-form-label">{{phrase.dueDate}}</label>
+                                        <div class="col-sm-4">
+                                            <input type="text" name="feeSchDetails" date-picker ng-model="form.feeSchDetails.fifth.due" ng-required="form.feeSchType == 'monthly'" class="form-control datemask" id="datemask15Due">
+                                        </div>
+                                    </div>
+                                    <div class="form-group row">
+                                        <label class="col-sm-2 text-right control-label col-form-label">{{phrase.feeScheduleSixthDate}}</label>
+                                        <div class="col-sm-4">
+                                            <input type="text" name="feeSchDetails" date-picker ng-model="form.feeSchDetails.sixth.date" ng-required="form.feeSchType == 'monthly'" class="form-control datemask" id="datemask16">
+                                        </div>
+                                        <label class="col-sm-2 text-right control-label col-form-label">{{phrase.dueDate}}</label>
+                                        <div class="col-sm-4">
+                                            <input type="text" name="feeSchDetails" date-picker ng-model="form.feeSchDetails.sixth.due" ng-required="form.feeSchType == 'monthly'" class="form-control datemask" id="datemask16Due">
+                                        </div>
+                                    </div>
+                                    <div class="form-group row">
+                                        <label class="col-sm-2 text-right control-label col-form-label">{{phrase.feeScheduleSeventhDate}}</label>
+                                        <div class="col-sm-4">
+                                            <input type="text" name="feeSchDetails" date-picker ng-model="form.feeSchDetails.seventh.date" ng-required="form.feeSchType == 'monthly'" class="form-control datemask" id="datemask17">
+                                        </div>
+                                        <label class="col-sm-2 text-right control-label col-form-label">{{phrase.dueDate}}</label>
+                                        <div class="col-sm-4">
+                                            <input type="text" name="feeSchDetails" date-picker ng-model="form.feeSchDetails.seventh.due" ng-required="form.feeSchType == 'monthly'" class="form-control datemask" id="datemask17Due">
+                                        </div>
+                                    </div>
+                                    <div class="form-group row">
+                                        <label class="col-sm-2 text-right control-label col-form-label">{{phrase.feeScheduleEighthDate}}</label>
+                                        <div class="col-sm-4">
+                                            <input type="text" name="feeSchDetails" date-picker ng-model="form.feeSchDetails.eighth.date" ng-required="form.feeSchType == 'monthly'" class="form-control datemask" id="datemask18">
+                                        </div>
+                                        <label class="col-sm-2 text-right control-label col-form-label">{{phrase.dueDate}}</label>
+                                        <div class="col-sm-4">
+                                            <input type="text" name="feeSchDetails" date-picker ng-model="form.feeSchDetails.eighth.due" ng-required="form.feeSchType == 'monthly'" class="form-control datemask" id="datemask18Due">
+                                        </div>
+                                    </div>
+                                    <div class="form-group row">
+                                        <label class="col-sm-2 text-right control-label col-form-label">{{phrase.feeScheduleNinthDate}}</label>
+                                        <div class="col-sm-4">
+                                            <input type="text" name="feeSchDetails" date-picker ng-model="form.feeSchDetails.ninth.date" ng-required="form.feeSchType == 'monthly'" class="form-control datemask" id="datemask19">
+                                        </div>
+                                        <label class="col-sm-2 text-right control-label col-form-label">{{phrase.dueDate}}</label>
+                                        <div class="col-sm-4">
+                                            <input type="text" name="feeSchDetails" date-picker ng-model="form.feeSchDetails.ninth.due" ng-required="form.feeSchType == 'monthly'" class="form-control datemask" id="datemask19Due">
+                                        </div>
+                                    </div>
+                                    <div class="form-group row">
+                                        <label class="col-sm-2 text-right control-label col-form-label">{{phrase.feeScheduleTenthDate}}</label>
+                                        <div class="col-sm-4">
+                                            <input type="text" name="feeSchDetails" date-picker ng-model="form.feeSchDetails.tenth.date" ng-required="form.feeSchType == 'monthly'" class="form-control datemask" id="datemask20">
+                                        </div>
+                                        <label class="col-sm-2 text-right control-label col-form-label">{{phrase.dueDate}}</label>
+                                        <div class="col-sm-4">
+                                            <input type="text" name="feeSchDetails" date-picker ng-model="form.feeSchDetails.tenth.due" ng-required="form.feeSchType == 'monthly'" class="form-control datemask" id="datemask20Due">
+                                        </div>
+                                    </div>
+                                    <div class="form-group row">
+                                        <label class="col-sm-2 text-right control-label col-form-label">{{phrase.feeScheduleEleventhDate}}</label>
+                                        <div class="col-sm-4">
+                                            <input type="text" name="feeSchDetails" date-picker ng-model="form.feeSchDetails.eleventh.date" ng-required="form.feeSchType == 'monthly'" class="form-control datemask" id="datemask21">
+                                        </div>
+                                        <label class="col-sm-2 text-right control-label col-form-label">{{phrase.dueDate}}</label>
+                                        <div class="col-sm-4">
+                                            <input type="text" name="feeSchDetails" date-picker ng-model="form.feeSchDetails.eleventh.due" ng-required="form.feeSchType == 'monthly'" class="form-control datemask" id="datemask21Due">
+                                        </div>
+                                    </div>
+                                    <div class="form-group row">
+                                        <label class="col-sm-2 text-right control-label col-form-label">{{phrase.feeScheduleTwelvethDate}}</label>
+                                        <div class="col-sm-4">
+                                            <input type="text" name="feeSchDetails" date-picker ng-model="form.feeSchDetails.twelveth.date" ng-required="form.feeSchType == 'monthly'" class="form-control datemask" id="datemask22">
+                                        </div>
+                                        <label class="col-sm-2 text-right control-label col-form-label">{{phrase.dueDate}}</label>
+                                        <div class="col-sm-4">
+                                            <input type="text" name="feeSchDetails" date-picker ng-model="form.feeSchDetails.twelveth.due" ng-required="form.feeSchType == 'monthly'" class="form-control datemask" id="datemask22Due">
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+                        <div class="form-group m-b-0">
+                            <div class="offset-sm-2 col-sm-10">
+                                <button type="submit" class="btn btn-info waves-effect waves-light" ng-disabled="addGrade.$invalid">{{phrase.addFeeType}}</button>
+                            </div>
+                        </div>
+                    </form>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row" ng-show="views.edit">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-block">
+                <button ng-click="changeView('list')" class="btn btn-danger btn-flat pull-right card-block-input-item">{{phrase.cancelEdit}}</button>
+                <h4 class="card-title">{{phrase.editFeeType}}</h4>
+                <div class="table-responsive">
+
+                    <form class="form-horizontal" name="editGrade" role="form" ng-submit="saveEdit()" novalidate>
+                        <div class="form-group row" ng-class="{'has-error': editGrade.feeTitle.$invalid}">
+                            <label class="col-sm-2 text-right control-label col-form-label">{{phrase.feeTypeTitle}} * </label>
+                            <div class="col-sm-10">
+                                <input type="text" name="feeTitle" ng-model="form.feeTitle" class="form-control" required placeholder="{{phrase.feeTypeTitle}}">
+                            </div>
+                        </div>
+                        <div class="form-group row" ng-class="{'has-error': editGrade.feeGroup.$invalid}">
+                            <label class="col-sm-2 text-right control-label col-form-label">{{phrase.groupTitle}} * </label>
+                            <div class="col-sm-10">
+                                <select class="form-control" ng-model="form.feeGroup" name="feeGroup" required>
+                                    <option ng-repeat="group in feeGroups" value="{{group.id}}">{{group.group_title}}</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <label class="col-sm-2 text-right control-label col-form-label">{{phrase.feeCode}}</label>
+                            <div class="col-sm-10">
+                                <input type="text" name="feeCode" ng-model="form.feeCode" class="form-control" placeholder="{{phrase.feeCode}}">
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <label class="col-sm-2 text-right control-label col-form-label">{{phrase.feeDescription}}</label>
+                            <div class="col-sm-10">
+                                <textarea name="feeDescription" class="form-control" ng-model="form.feeDescription" placeholder="{{phrase.feeDescription}}"></textarea>
+                            </div>
+                        </div>
+                        <div class="form-group row" ng-class="{'has-error': editGrade.feeAmount.$invalid}">
+                            <label class="col-sm-2 text-right control-label col-form-label">{{phrase.feeAmount}}</label>
+                            <div class="col-sm-10">
+                                <input type="text" name="feeAmount" ng-model="form.feeAmount" required class="form-control" placeholder="{{phrase.feeAmount}}">
+                            </div>
+                        </div>
+                        <div class="form-group row" ng-class="{'has-error': editGrade.feeSchType.$invalid}">
+                            <label class="col-sm-2 text-right control-label col-form-label">{{phrase.feeSchedule}}</label>
+                            <div class="col-sm-10">
+                                <div class="radio-list">
+                                    <label>
+                                        <input type="radio" ng-model="form.feeSchType" required value="na" ng-click="chgFeeSchType('nothing')"> N/A
+                                    </label>
+                                </div>
+                                <div class="radio-list">
+                                    <label>
+                                        <input type="radio" ng-model="form.feeSchType" required value="onetime" ng-click="chgFeeSchType('first')"> {{phrase.feeScheduleOneTime}}
+                                    </label>
+                                </div>
+                                <div class="radio-list">
+                                    <label>
+                                        <input type="radio" ng-model="form.feeSchType" required value="annually" ng-click="chgFeeSchType('first')"> {{phrase.feeScheduleAnnually}}
+                                    </label>
+                                </div>
+                                <div class="radio-list">
+                                    <label>
+                                        <input type="radio" ng-model="form.feeSchType" required value="biannually" ng-click="chgFeeSchType('second')"> {{phrase.feeScheduleBiAnnually}}
+                                    </label>
+                                </div>
+                                <div class="radio-list">
+                                    <label>
+                                        <input type="radio" ng-model="form.feeSchType" required value="triannually" ng-click="chgFeeSchType('third')">  {{phrase.feeScheduleTriAnnually}}
+                                    </label>
+                                </div>
+                                <div class="radio-list">
+                                    <label>
+                                        <input type="radio" ng-model="form.feeSchType" required value="quarterly" ng-click="chgFeeSchType('fourth')"> {{phrase.feeScheduleQuarterly}}
+                                    </label>
+                                </div>
+                                <div class="radio-list">
+                                    <label>
+                                        <input type="radio" ng-model="form.feeSchType" required value="monthly" ng-click="chgFeeSchType('twelvth')"> {{phrase.feeScheduleMonthly}}
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card card-outline-info" style="border: 1px solid #009efb;" ng-show="form.feeSchType" ng-class="{'has-error': editGrade.feeSchDetails.$invalid}">
+                            <div class="card-header">
+                                <h4 class="m-b-0 text-white">{{phrase.feeSchedule}} Details</h4>
+                            </div>
+                            <div class="card-block">
+                                <p class="card-text text-center">{{phrase.feeScheduleGenerateInvoice}}:</p>
+
+                                <div class="form-group row" ng-show="form.feeSchType == 'onetime'">
+                                    <label class="col-sm-2 text-right control-label col-form-label">{{phrase.feeScheduleFixedDate}}</label>
+                                    <div class="col-sm-4">
+                                        <input type="text" name="feeSchDetails" date-picker ng-model="form.feeSchDetails.first.date" ng-required="form.feeSchType == 'onetime'" class="form-control datemask" id="datemaskEdit">
+                                    </div>
+                                    <label class="col-sm-2 text-right control-label col-form-label">{{phrase.dueDate}}</label>
+                                    <div class="col-sm-4">
+                                        <input type="text" name="feeSchDetails" date-picker ng-model="form.feeSchDetails.first.due" ng-required="form.feeSchType == 'onetime'" class="form-control datemask" id="datemaskEditdue">
+                                    </div>
+                                </div>
+
+                                <div ng-show="form.feeSchType == 'annually'">
+                                    <div class="form-group row">
+                                        <label class="col-sm-2 text-right control-label col-form-label">{{phrase.feeScheduleFirstDate}}</label>
+                                        <div class="col-sm-4">
+                                            <input type="text" name="feeSchDetails" date-picker ng-model="form.feeSchDetails.first.date" ng-required="form.feeSchType == 'annually'" class="form-control datemask" id="datemaskEdit1">
+                                        </div>
+                                        <label class="col-sm-2 text-right control-label col-form-label">{{phrase.dueDate}}</label>
+                                        <div class="col-sm-4">
+                                            <input type="text" name="feeSchDetails" date-picker ng-model="form.feeSchDetails.first.due" ng-required="form.feeSchType == 'annually'" class="form-control datemask" id="datemaskEdit1Due">
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div ng-show="form.feeSchType == 'biannually'">
+                                    <div class="form-group row">
+                                        <label class="col-sm-2 text-right control-label col-form-label">{{phrase.feeScheduleFirstDate}}</label>
+                                        <div class="col-sm-4">
+                                            <input type="text" name="feeSchDetails" date-picker ng-model="form.feeSchDetails.first.date" ng-required="form.feeSchType == 'biannually'" class="form-control datemask" id="datemaskEdit2">
+                                        </div>
+                                        <label class="col-sm-2 text-right control-label col-form-label">{{phrase.dueDate}}</label>
+                                        <div class="col-sm-4">
+                                            <input type="text" name="feeSchDetails" date-picker ng-model="form.feeSchDetails.first.due" ng-required="form.feeSchType == 'biannually'" class="form-control datemask" id="datemaskEdit2Due">
+                                        </div>
+                                    </div>
+                                    <div class="form-group row">
+                                        <label class="col-sm-2 text-right control-label col-form-label">{{phrase.feeScheduleSecondDate}}</label>
+                                        <div class="col-sm-4">
+                                            <input type="text" name="feeSchDetails" date-picker ng-model="form.feeSchDetails.second.date" ng-required="form.feeSchType == 'biannually'" class="form-control datemask" id="datemaskEdit3">
+                                        </div>
+                                        <label class="col-sm-2 text-right control-label col-form-label">{{phrase.dueDate}}</label>
+                                        <div class="col-sm-4">
+                                            <input type="text" name="feeSchDetails" date-picker ng-model="form.feeSchDetails.second.due" ng-required="form.feeSchType == 'biannually'" class="form-control datemask" id="datemaskEdit3Due">
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div ng-show="form.feeSchType == 'triannually'">
+                                    <div class="form-group row">
+                                        <label class="col-sm-2 text-right control-label col-form-label">{{phrase.feeScheduleFirstDate}}</label>
+                                        <div class="col-sm-4">
+                                            <input type="text" name="feeSchDetails" date-picker ng-model="form.feeSchDetails.first.date" ng-required="form.feeSchType == 'triannually'" class="form-control datemask" id="datemaskEdit4">
+                                        </div>
+                                        <label class="col-sm-2 text-right control-label col-form-label">{{phrase.dueDate}}</label>
+                                        <div class="col-sm-4">
+                                            <input type="text" name="feeSchDetails" date-picker ng-model="form.feeSchDetails.first.due" ng-required="form.feeSchType == 'triannually'" class="form-control datemask" id="datemaskEdit4Due">
+                                        </div>
+                                    </div>
+                                    <div class="form-group row">
+                                        <label class="col-sm-2 text-right control-label col-form-label">{{phrase.feeScheduleSecondDate}}</label>
+                                        <div class="col-sm-4">
+                                            <input type="text" name="feeSchDetails" date-picker ng-model="form.feeSchDetails.second.date" ng-required="form.feeSchType == 'triannually'" class="form-control datemask" id="datemaskEdit5">
+                                        </div>
+                                        <label class="col-sm-2 text-right control-label col-form-label">{{phrase.dueDate}}</label>
+                                        <div class="col-sm-4">
+                                            <input type="text" name="feeSchDetails" date-picker ng-model="form.feeSchDetails.second.due" ng-required="form.feeSchType == 'triannually'" class="form-control datemask" id="datemaskEdit5Due">
+                                        </div>
+                                    </div>
+                                    <div class="form-group row">
+                                        <label class="col-sm-2 text-right control-label col-form-label">{{phrase.feeScheduleThirdDate}}</label>
+                                        <div class="col-sm-4">
+                                            <input type="text" name="feeSchDetails" date-picker ng-model="form.feeSchDetails.third.date" ng-required="form.feeSchType == 'triannually'" class="form-control datemask" id="datemaskEdit6">
+                                        </div>
+                                        <label class="col-sm-2 text-right control-label col-form-label">{{phrase.dueDate}}</label>
+                                        <div class="col-sm-4">
+                                            <input type="text" name="feeSchDetails" date-picker ng-model="form.feeSchDetails.third.due" ng-required="form.feeSchType == 'triannually'" class="form-control datemask" id="datemaskEdit6Due">
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div ng-show="form.feeSchType == 'quarterly'">
+                                    <div class="form-group row">
+                                        <label class="col-sm-2 text-right control-label col-form-label">{{phrase.feeScheduleFirstDate}}</label>
+                                        <div class="col-sm-4">
+                                            <input type="text" name="feeSchDetails" date-picker ng-model="form.feeSchDetails.first.date" ng-required="form.feeSchType == 'quarterly'" class="form-control datemask" id="datemaskEdit7">
+                                        </div>
+                                        <label class="col-sm-2 text-right control-label col-form-label">{{phrase.dueDate}}</label>
+                                        <div class="col-sm-4">
+                                            <input type="text" name="feeSchDetails" date-picker ng-model="form.feeSchDetails.first.due" ng-required="form.feeSchType == 'quarterly'" class="form-control datemask" id="datemaskEdit7Due">
+                                        </div>
+                                    </div>
+                                    <div class="form-group row">
+                                        <label class="col-sm-2 text-right control-label col-form-label">{{phrase.feeScheduleSecondDate}}</label>
+                                        <div class="col-sm-4">
+                                            <input type="text" name="feeSchDetails" date-picker ng-model="form.feeSchDetails.second.date" ng-required="form.feeSchType == 'quarterly'" class="form-control datemask" id="datemaskEdit8">
+                                        </div>
+                                        <label class="col-sm-2 text-right control-label col-form-label">{{phrase.dueDate}}</label>
+                                        <div class="col-sm-4">
+                                            <input type="text" name="feeSchDetails" date-picker ng-model="form.feeSchDetails.second.due" ng-required="form.feeSchType == 'quarterly'" class="form-control datemask" id="datemaskEdit8Due">
+                                        </div>
+                                    </div>
+                                    <div class="form-group row">
+                                        <label class="col-sm-2 text-right control-label col-form-label">{{phrase.feeScheduleThirdDate}}</label>
+                                        <div class="col-sm-4">
+                                            <input type="text" name="feeSchDetails" date-picker ng-model="form.feeSchDetails.third.date" ng-required="form.feeSchType == 'quarterly'" class="form-control datemask" id="datemaskEdit9">
+                                        </div>
+                                        <label class="col-sm-2 text-right control-label col-form-label">{{phrase.dueDate}}</label>
+                                        <div class="col-sm-4">
+                                            <input type="text" name="feeSchDetails" date-picker ng-model="form.feeSchDetails.third.due" ng-required="form.feeSchType == 'quarterly'" class="form-control datemask" id="datemaskEdit9Due">
+                                        </div>
+                                    </div>
+                                    <div class="form-group row">
+                                        <label class="col-sm-2 text-right control-label col-form-label">{{phrase.feeScheduleFourthDate}}</label>
+                                        <div class="col-sm-4">
+                                            <input type="text" name="feeSchDetails" date-picker ng-model="form.feeSchDetails.fourth.date" ng-required="form.feeSchType == 'quarterly'" class="form-control datemask" id="datemaskEdit10">
+                                        </div>
+                                        <label class="col-sm-2 text-right control-label col-form-label">{{phrase.dueDate}}</label>
+                                        <div class="col-sm-4">
+                                            <input type="text" name="feeSchDetails" date-picker ng-model="form.feeSchDetails.fourth.due" ng-required="form.feeSchType == 'quarterly'" class="form-control datemask" id="datemaskEdit10Due">
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div ng-show="form.feeSchType == 'monthly'">
+                                    <div class="form-group row">
+                                        <label class="col-sm-2 text-right control-label col-form-label">{{phrase.feeScheduleFirstDate}}</label>
+                                        <div class="col-sm-4">
+                                            <input type="text" name="feeSchDetails" date-picker ng-model="form.feeSchDetails.first.date" ng-required="form.feeSchType == 'monthly'" class="form-control datemask" id="datemaskEdit11">
+                                        </div>
+                                        <label class="col-sm-2 text-right control-label col-form-label">{{phrase.dueDate}}</label>
+                                        <div class="col-sm-4">
+                                            <input type="text" name="feeSchDetails" date-picker ng-model="form.feeSchDetails.first.due" ng-required="form.feeSchType == 'monthly'" class="form-control datemask" id="datemaskEdit11Due">
+                                        </div>
+                                    </div>
+                                    <div class="form-group row">
+                                        <label class="col-sm-2 text-right control-label col-form-label">{{phrase.feeScheduleSecondDate}}</label>
+                                        <div class="col-sm-4">
+                                            <input type="text" name="feeSchDetails" date-picker ng-model="form.feeSchDetails.second.date" ng-required="form.feeSchType == 'monthly'" class="form-control datemask" id="datemaskEdit12">
+                                        </div>
+                                        <label class="col-sm-2 text-right control-label col-form-label">{{phrase.dueDate}}</label>
+                                        <div class="col-sm-4">
+                                            <input type="text" name="feeSchDetails" date-picker ng-model="form.feeSchDetails.second.due" ng-required="form.feeSchType == 'monthly'" class="form-control datemask" id="datemaskEdit12Due">
+                                        </div>
+                                    </div>
+                                    <div class="form-group row">
+                                        <label class="col-sm-2 text-right control-label col-form-label">{{phrase.feeScheduleThirdDate}}</label>
+                                        <div class="col-sm-4">
+                                            <input type="text" name="feeSchDetails" date-picker ng-model="form.feeSchDetails.third.date" ng-required="form.feeSchType == 'monthly'" class="form-control datemask" id="datemaskEdit13">
+                                        </div>
+                                        <label class="col-sm-2 text-right control-label col-form-label">{{phrase.dueDate}}</label>
+                                        <div class="col-sm-4">
+                                            <input type="text" name="feeSchDetails" date-picker ng-model="form.feeSchDetails.third.due" ng-required="form.feeSchType == 'monthly'" class="form-control datemask" id="datemaskEdit13Due">
+                                        </div>
+                                    </div>
+                                    <div class="form-group row">
+                                        <label class="col-sm-2 text-right control-label col-form-label">{{phrase.feeScheduleFourthDate}}</label>
+                                        <div class="col-sm-4">
+                                            <input type="text" name="feeSchDetails" date-picker ng-model="form.feeSchDetails.fourth.date" ng-required="form.feeSchType == 'monthly'" class="form-control datemask" id="datemaskEdit14">
+                                        </div>
+                                        <label class="col-sm-2 text-right control-label col-form-label">{{phrase.dueDate}}</label>
+                                        <div class="col-sm-4">
+                                            <input type="text" name="feeSchDetails" date-picker ng-model="form.feeSchDetails.fourth.due" ng-required="form.feeSchType == 'monthly'" class="form-control datemask" id="datemaskEdit14Due">
+                                        </div>
+                                    </div>
+                                    <div class="form-group row">
+                                        <label class="col-sm-2 text-right control-label col-form-label">{{phrase.feeScheduleFifthDate}}</label>
+                                        <div class="col-sm-4">
+                                            <input type="text" name="feeSchDetails" date-picker ng-model="form.feeSchDetails.fifth.date" ng-required="form.feeSchType == 'monthly'" class="form-control datemask" id="datemaskEdit15">
+                                        </div>
+                                        <label class="col-sm-2 text-right control-label col-form-label">{{phrase.dueDate}}</label>
+                                        <div class="col-sm-4">
+                                            <input type="text" name="feeSchDetails" date-picker ng-model="form.feeSchDetails.fifth.due" ng-required="form.feeSchType == 'monthly'" class="form-control datemask" id="datemaskEdit15Due">
+                                        </div>
+                                    </div>
+                                    <div class="form-group row">
+                                        <label class="col-sm-2 text-right control-label col-form-label">{{phrase.feeScheduleSixthDate}}</label>
+                                        <div class="col-sm-4">
+                                            <input type="text" name="feeSchDetails" date-picker ng-model="form.feeSchDetails.sixth.date" ng-required="form.feeSchType == 'monthly'" class="form-control datemask" id="datemaskEdit16">
+                                        </div>
+                                        <label class="col-sm-2 text-right control-label col-form-label">{{phrase.dueDate}}</label>
+                                        <div class="col-sm-4">
+                                            <input type="text" name="feeSchDetails" date-picker ng-model="form.feeSchDetails.sixth.due" ng-required="form.feeSchType == 'monthly'" class="form-control datemask" id="datemaskEdit16Due">
+                                        </div>
+                                    </div>
+                                    <div class="form-group row">
+                                        <label class="col-sm-2 text-right control-label col-form-label">{{phrase.feeScheduleSeventhDate}}</label>
+                                        <div class="col-sm-4">
+                                            <input type="text" name="feeSchDetails" date-picker ng-model="form.feeSchDetails.seventh.date" ng-required="form.feeSchType == 'monthly'" class="form-control datemask" id="datemaskEdit17">
+                                        </div>
+                                        <label class="col-sm-2 text-right control-label col-form-label">{{phrase.dueDate}}</label>
+                                        <div class="col-sm-4">
+                                            <input type="text" name="feeSchDetails" date-picker ng-model="form.feeSchDetails.seventh.due" ng-required="form.feeSchType == 'monthly'" class="form-control datemask" id="datemaskEdit17Due">
+                                        </div>
+                                    </div>
+                                    <div class="form-group row">
+                                        <label class="col-sm-2 text-right control-label col-form-label">{{phrase.feeScheduleEighthDate}}</label>
+                                        <div class="col-sm-4">
+                                            <input type="text" name="feeSchDetails" date-picker ng-model="form.feeSchDetails.eighth.date" ng-required="form.feeSchType == 'monthly'" class="form-control datemask" id="datemaskEdit18">
+                                        </div>
+                                        <label class="col-sm-2 text-right control-label col-form-label">{{phrase.dueDate}}</label>
+                                        <div class="col-sm-4">
+                                            <input type="text" name="feeSchDetails" date-picker ng-model="form.feeSchDetails.eighth.due" ng-required="form.feeSchType == 'monthly'" class="form-control datemask" id="datemaskEdit18Due">
+                                        </div>
+                                    </div>
+                                    <div class="form-group row">
+                                        <label class="col-sm-2 text-right control-label col-form-label">{{phrase.feeScheduleNinthDate}}</label>
+                                        <div class="col-sm-4">
+                                            <input type="text" name="feeSchDetails" date-picker ng-model="form.feeSchDetails.ninth.date" ng-required="form.feeSchType == 'monthly'" class="form-control datemask" id="datemaskEdit19">
+                                        </div>
+                                        <label class="col-sm-2 text-right control-label col-form-label">{{phrase.dueDate}}</label>
+                                        <div class="col-sm-4">
+                                            <input type="text" name="feeSchDetails" date-picker ng-model="form.feeSchDetails.ninth.due" ng-required="form.feeSchType == 'monthly'" class="form-control datemask" id="datemaskEdit19Due">
+                                        </div>
+                                    </div>
+                                    <div class="form-group row">
+                                        <label class="col-sm-2 text-right control-label col-form-label">{{phrase.feeScheduleTenthDate}}</label>
+                                        <div class="col-sm-4">
+                                            <input type="text" name="feeSchDetails" date-picker ng-model="form.feeSchDetails.tenth.date" ng-required="form.feeSchType == 'monthly'" class="form-control datemask" id="datemaskEdit20">
+                                        </div>
+                                        <label class="col-sm-2 text-right control-label col-form-label">{{phrase.dueDate}}</label>
+                                        <div class="col-sm-4">
+                                            <input type="text" name="feeSchDetails" date-picker ng-model="form.feeSchDetails.tenth.due" ng-required="form.feeSchType == 'monthly'" class="form-control datemask" id="datemaskEdit20Due">
+                                        </div>
+                                    </div>
+                                    <div class="form-group row">
+                                        <label class="col-sm-2 text-right control-label col-form-label">{{phrase.feeScheduleEleventhDate}}</label>
+                                        <div class="col-sm-4">
+                                            <input type="text" name="feeSchDetails" date-picker ng-model="form.feeSchDetails.eleventh.date" ng-required="form.feeSchType == 'monthly'" class="form-control datemask" id="datemaskEdit21">
+                                        </div>
+                                        <label class="col-sm-2 text-right control-label col-form-label">{{phrase.dueDate}}</label>
+                                        <div class="col-sm-4">
+                                            <input type="text" name="feeSchDetails" date-picker ng-model="form.feeSchDetails.eleventh.due" ng-required="form.feeSchType == 'monthly'" class="form-control datemask" id="datemaskEdit21Due">
+                                        </div>
+                                    </div>
+                                    <div class="form-group row">
+                                        <label class="col-sm-2 text-right control-label col-form-label">{{phrase.feeScheduleTwelvethDate}}</label>
+                                        <div class="col-sm-4">
+                                            <input type="text" name="feeSchDetails" date-picker ng-model="form.feeSchDetails.twelveth.date" ng-required="form.feeSchType == 'monthly'" class="form-control datemask" id="datemaskEdit22">
+                                        </div>
+                                        <label class="col-sm-2 text-right control-label col-form-label">{{phrase.dueDate}}</label>
+                                        <div class="col-sm-4">
+                                            <input type="text" name="feeSchDetails" date-picker ng-model="form.feeSchDetails.twelveth.due" ng-required="form.feeSchType == 'monthly'" class="form-control datemask" id="datemaskEdit22Due">
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+                        <div class="form-group m-b-0">
+                            <div class="offset-sm-2 col-sm-10">
+                                <button type="submit" class="btn btn-info waves-effect waves-light" ng-disabled="editGrade.$invalid">{{phrase.editFeeType}}</button>
+                            </div>
+                        </div>
+                    </form>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

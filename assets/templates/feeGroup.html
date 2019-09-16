@@ -1,0 +1,129 @@
+<div class="row page-titles">
+    <div class="col-md-6 col-8 align-self-center">
+        <h3 class="text-themecolor m-b-0 m-t-0">{{phrase.FeeGroups}}</h3>
+    </div>
+    <div class="col-md-6 col-4 align-self-center">
+
+    </div>
+</div>
+
+<div class="row" ng-show="views.list">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-block">
+                <button ng-show="$root.can('FeeGroups.addFeeGroup')" ng-click="changeView('add')" class="btn pull-right btn-success card-block-input-item">{{phrase.addFeeGroup}}</button>
+                <div class="pull-right card-block-input-group card-block-input-item">
+                    <div class="input-group input-group-sm">
+                        <input type="text" name="table_search" ng-model="searchText" placeholder="{{phrase.Search}}" class="form-control">
+                        <span class="input-group-addon"><i class="fa fa-search"></i></span>
+                    </div>
+                </div>
+                <h4 class="card-title">{{phrase.listFeeGroups}}</h4>
+                <div class="table-responsive">
+
+                    <table class="table table-bordered table-hover">
+                        <tbody>
+                            <tr>
+                                <th>{{phrase.groupTitle}}</th>
+                                <th>{{phrase.invPrefix}}</th>
+                                <th>{{phrase.groupDesc}}</th>
+                                <th ng-show="$root.can('FeeGroups.editFeeGroup') || $root.can('FeeGroups.delFeeGroup')">{{phrase.Operations}}</th>
+                            </tr>
+                            <tr ng-repeat="group in feeGroups | filter:searchText">
+                                <td>{{group.group_title}}</td>
+                                <td>{{group.invoice_prefix}}</td>
+                                <td>{{group.group_description}}</td>
+                                <td ng-show="$root.can('FeeGroups.editFeeGroup') || $root.can('FeeGroups.delFeeGroup')">
+                                    <button ng-show="$root.can('FeeGroups.editFeeGroup')" ng-click="edit(group.id)" type="button" class="btn btn-info btn-circle" title="{{phrase.Edit}}" tooltip><i class="fa fa-pencil"></i></button>
+                                    <button ng-show="$root.can('FeeGroups.delFeeGroup')" ng-click="remove(group,$index)" type="button" class="btn btn-danger btn-circle" title="{{phrase.Remove}}" tooltip><i class="fa fa-trash-o"></i></button>
+                                </td>
+                            </tr>
+                            <tr ng-show="!feeGroups.length"><td class="noTableData" colspan="4">{{phrade.noGroups}}</td></tr>
+                        </tbody>
+                    </table>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row" ng-show="views.add">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-block">
+                <button ng-click="changeView('list')" class="btn btn-danger btn-flat pull-right card-block-input-item">{{phrase.cancelAdd}}</button>
+                <h4 class="card-title">{{phrase.addFeeGroup}}</h4>
+                <div class="table-responsive">
+
+                    <form class="form-horizontal" name="addGrade" role="form" ng-submit="saveAdd()" novalidate>
+                        <div class="form-group row" ng-class="{'has-error': addGrade.group_title.$invalid}">
+                            <label class="col-sm-2 text-right control-label col-form-label">{{phrase.groupTitle}} * </label>
+                            <div class="col-sm-10">
+                                <input type="text" name="group_title" ng-model="form.group_title" class="form-control" required placeholder="{{phrase.groupTitle}}">
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <label class="col-sm-2 text-right control-label col-form-label">{{phrase.groupDesc}}</label>
+                            <div class="col-sm-10">
+                                <textarea name="group_description" class="form-control" ng-model="form.group_description" placeholder="{{phrase.groupDesc}}"></textarea>
+                            </div>
+                        </div>
+                        <div class="form-group row" ng-class="{'has-error': addGrade.invoice_prefix.$invalid}">
+                            <label class="col-sm-2 text-right control-label col-form-label">{{phrase.invPrefix}} * </label>
+                            <div class="col-sm-10">
+                                <input type="text" name="invoice_prefix" ng-model="form.invoice_prefix" class="form-control" required placeholder="{{phrase.invPrefix}}">
+                            </div>
+                        </div>
+                        <div class="form-group m-b-0">
+                            <div class="offset-sm-2 col-sm-10">
+                                <button type="submit" class="btn btn-info waves-effect waves-light" ng-disabled="addGrade.$invalid">{{phrase.addFeeGroup}}</button>
+                            </div>
+                        </div>
+                    </form>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row" ng-show="views.edit">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-block">
+                <button ng-click="changeView('list')" class="btn btn-danger btn-flat pull-right card-block-input-item">{{phrase.cancelEdit}}</button>
+                <h4 class="card-title">{{phrase.editFeeGroup}}</h4>
+                <div class="table-responsive">
+
+                    <form class="form-horizontal" name="editGrade" role="form" ng-submit="saveEdit()" novalidate>
+                        <div class="form-group row" ng-class="{'has-error': addGrade.group_title.$invalid}">
+                            <label class="col-sm-2 text-right control-label col-form-label">{{phrase.groupTitle}} * </label>
+                            <div class="col-sm-10">
+                                <input type="text" name="group_title" ng-model="form.group_title" class="form-control" required placeholder="{{phrase.groupTitle}}">
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <label class="col-sm-2 text-right control-label col-form-label">{{phrase.groupDesc}}</label>
+                            <div class="col-sm-10">
+                                <textarea name="group_description" class="form-control" ng-model="form.group_description" placeholder="{{phrase.groupDesc}}"></textarea>
+                            </div>
+                        </div>
+                        <div class="form-group row" ng-class="{'has-error': addGrade.invoice_prefix.$invalid}">
+                            <label class="col-sm-2 text-right control-label col-form-label">{{phrase.invPrefix}} * </label>
+                            <div class="col-sm-10">
+                                <input type="text" name="invoice_prefix" ng-model="form.invoice_prefix" class="form-control" required placeholder="{{phrase.invPrefix}}">
+                            </div>
+                        </div>
+                        <div class="form-group m-b-0">
+                            <div class="offset-sm-2 col-sm-10">
+                                <button type="submit" class="btn btn-info waves-effect waves-light" ng-disabled="editGrade.$invalid">{{phrase.editFeeGroup}}</button>
+                            </div>
+                        </div>
+                    </form>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,432 @@
+<div class="row page-titles">
+    <div class="col-md-6 col-8 align-self-center">
+        <h3 class="text-themecolor m-b-0 m-t-0">{{phrase.FeeDiscount}}</h3>
+    </div>
+    <div class="col-md-6 col-4 align-self-center">
+
+    </div>
+</div>
+
+<div class="row" ng-show="views.list">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-block">
+                <button ng-show="$root.can('FeeDiscount.addFeeDiscount')" ng-click="changeView('add')" class="btn pull-right btn-success card-block-input-item">{{phrase.addFeeDiscount}}</button>
+                <div class="pull-right card-block-input-group card-block-input-item">
+                    <div class="input-group input-group-sm">
+                        <input type="text" name="table_search" ng-model="searchText" placeholder="{{phrase.Search}}" class="form-control">
+                        <span class="input-group-addon"><i class="fa fa-search"></i></span>
+                    </div>
+                </div>
+                <h4 class="card-title">{{phrase.listFeeDiscount}}</h4>
+                <div class="table-responsive">
+
+                    <table class="table table-bordered table-hover">
+                        <tbody>
+                            <tr>
+                                <th>{{phrase.discTitle}}</th>
+                                <th>{{phrase.Description}}</th>
+                                <th>{{phrase.discCode}}</th>
+                                <th>{{phrase.discTypVal}}</th>
+                                <th ng-show="$root.can('FeeDiscount.assignUser') || $root.can('FeeDiscount.editFeeDiscount') || $root.can('FeeDiscount.delFeeDiscount')">{{phrase.Operations}}</th>
+                            </tr>
+                            <tr ng-repeat="discount in feeDiscount | filter:searchText">
+                                <td>{{discount.discount_name}}</td>
+                                <td>{{discount.dicount_description}}</td>
+                                <td>{{discount.discount_code}}</td>
+                                <td>{{discount.discount_type}}/{{discount.discount_value}}</td>
+                                <td ng-show="$root.can('FeeDiscount.assignUser') || $root.can('FeeDiscount.editFeeDiscount') || $root.can('FeeDiscount.delFeeDiscount')">
+                                    <button ng-show="$root.can('FeeDiscount.assignUser')" ng-click="ctrl_assignment(discount.id)" type="button" class="btn btn-success btn-circle" title="{{phrase.assignUser}}" tooltip><i class="fa fa-search"></i></button>
+                                    <button ng-show="$root.can('FeeDiscount.editFeeDiscount')" ng-click="edit(discount.id)" type="button" class="btn btn-info btn-circle" title="{{phrase.Edit}}" tooltip><i class="fa fa-pencil"></i></button>
+                                    <button ng-show="$root.can('FeeDiscount.delFeeDiscount')" ng-click="remove(discount,$index)" type="button" class="btn btn-danger btn-circle" title="{{phrase.Remove}}" tooltip><i class="fa fa-trash-o"></i></button>
+                                </td>
+                            </tr>
+                            <tr ng-show="!feeDiscount.length"><td class="noTableData" colspan="5">No fee discount available</td></tr>
+                        </tbody>
+                    </table>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row" ng-show="views.add">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-block">
+                <button ng-click="changeView('list')" class="btn btn-danger btn-flat pull-right card-block-input-item">{{phrase.cancelAdd}}</button>
+                <h4 class="card-title">{{phrase.addFeeDiscount}}</h4>
+                <div class="table-responsive">
+
+                    <form class="form-horizontal" name="addGrade" role="form" ng-submit="saveAdd()" novalidate>
+                        <div class="form-group row" ng-class="{'has-error': addGrade.discount_name.$invalid}">
+                            <label class="col-sm-2 text-right control-label col-form-label">{{phrase.discTitle}} * </label>
+                            <div class="col-sm-10">
+                                <input type="text" name="discount_name" ng-model="form.discount_name" class="form-control" required placeholder="{{phrase.discTitle}}">
+                            </div>
+                        </div>
+                        <div class="form-group row" ng-class="{'has-error': addGrade.dicount_description.$invalid}">
+                            <label class="col-sm-2 text-right control-label col-form-label">{{phrase.discDesc}} </label>
+                            <div class="col-sm-10">
+                                <textarea name="dicount_description" class="form-control" ng-model="form.dicount_description" placeholder="{{phrase.discDesc}}"></textarea>
+                            </div>
+                        </div>
+                        <div class="form-group row" ng-class="{'has-error': addGrade.discount_code.$invalid}">
+                            <label class="col-sm-2 text-right control-label col-form-label">{{phrase.discCode}} *</label>
+                            <div class="col-sm-10">
+                                <input type="text" name="discount_code" ng-model="form.discount_code" class="form-control" required placeholder="{{phrase.discCode}}">
+                            </div>
+                        </div>
+                        <div class="form-group row" ng-class="{'has-error': addGrade.discount_type.$invalid}">
+                            <label class="col-sm-2 text-right control-label col-form-label">{{phrase.discType}} *</label>
+                            <div class="col-sm-10">
+                                <div class="radio-list">
+                                    <label>
+                                        <input type="radio" name="discount_type" ng-model="form.discount_type" required value="percentage"> {{phrase.percent}}
+                                    </label>
+                                </div>
+                                <div class="radio-list">
+                                    <label>
+                                        <input type="radio" name="discount_type" ng-model="form.discount_type" required value="fixed"> {{phrase.fixed}}
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group row" ng-class="{'has-error': addGrade.discount_value.$invalid}">
+                            <label class="col-sm-2 text-right control-label col-form-label">{{phrase.Amount}} *</label>
+                            <div class="col-sm-10">
+                                <input type="text" name="discount_value" ng-model="form.discount_value" required class="form-control" placeholder="{{phrase.Amount}}">
+                            </div>
+                        </div>
+                        <div class="form-group row" ng-class="{'has-error': addGrade.discount_status.$invalid}">
+                            <label class="col-sm-2 text-right control-label col-form-label">{{phrase.codeStatus}} *</label>
+                            <div class="col-sm-10">
+                                <div class="radio-list">
+                                    <label>
+                                        <input type="radio" name="discount_status" ng-model="form.discount_status" required value="1"> {{phrase.enabled}}
+                                    </label>
+                                </div>
+                                <div class="radio-list">
+                                    <label>
+                                        <input type="radio" name="discount_status" ng-model="form.discount_status" required value="0"> {{phrase.disabled}}
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group m-b-0">
+                            <div class="offset-sm-2 col-sm-10">
+                                <button type="submit" class="btn btn-info waves-effect waves-light" ng-disabled="addGrade.$invalid">{{phrase.addFeeDiscount}}</button>
+                            </div>
+                        </div>
+                    </form>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row" ng-show="views.edit">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-block">
+                <button ng-click="changeView('list')" class="btn btn-danger btn-flat pull-right card-block-input-item">{{phrase.cancelEdit}}</button>
+                <h4 class="card-title">{{phrase.editFeeDiscount}}</h4>
+                <div class="table-responsive">
+
+                    <form class="form-horizontal" name="editGrade" role="form" ng-submit="saveEdit()" novalidate>
+                        <div class="form-group row" ng-class="{'has-error': editGrade.discount_name.$invalid}">
+                            <label class="col-sm-2 text-right control-label col-form-label">{{phrase.discTitle}} * </label>
+                            <div class="col-sm-10">
+                                <input type="text" name="discount_name" ng-model="form.discount_name" class="form-control" required placeholder="{{phrase.discTitle}}">
+                            </div>
+                        </div>
+                        <div class="form-group row" ng-class="{'has-error': editGrade.dicount_description.$invalid}">
+                            <label class="col-sm-2 text-right control-label col-form-label">{{phrase.discDesc}} </label>
+                            <div class="col-sm-10">
+                                <textarea name="dicount_description" class="form-control" ng-model="form.dicount_description" placeholder="{{phrase.discDesc}}"></textarea>
+                            </div>
+                        </div>
+                        <div class="form-group row" ng-class="{'has-error': editGrade.discount_code.$invalid}">
+                            <label class="col-sm-2 text-right control-label col-form-label">{{phrase.discCode}} *</label>
+                            <div class="col-sm-10">
+                                <input type="text" name="discount_code" ng-model="form.discount_code" class="form-control" required placeholder="{{phrase.discCode}}">
+                            </div>
+                        </div>
+                        <div class="form-group row" ng-class="{'has-error': editGrade.discount_type.$invalid}">
+                            <label class="col-sm-2 text-right control-label col-form-label">{{phrase.discType}} *</label>
+                            <div class="col-sm-10">
+                                <div class="radio-list">
+                                    <label>
+                                        <input type="radio" name="discount_type" ng-model="form.discount_type" required value="percentage"> {{phrase.percent}}
+                                    </label>
+                                </div>
+                                <div class="radio-list">
+                                    <label>
+                                        <input type="radio" name="discount_type" ng-model="form.discount_type" required value="fixed"> {{phrase.fixed}}
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group row" ng-class="{'has-error': editGrade.discount_value.$invalid}">
+                            <label class="col-sm-2 text-right control-label col-form-label">{{phrase.Amount}} *</label>
+                            <div class="col-sm-10">
+                                <input type="text" name="discount_value" ng-model="form.discount_value" required class="form-control" placeholder="{{phrase.Amount}}">
+                            </div>
+                        </div>
+                        <div class="form-group row" ng-class="{'has-error': addGrade.discount_status.$invalid}">
+                            <label class="col-sm-2 text-right control-label col-form-label">{{phrase.codeStatus}} *</label>
+                            <div class="col-sm-10">
+                                <div class="radio-list">
+                                    <label>
+                                        <input type="radio" name="discount_status" ng-model="form.discount_status" required value="1"> {{phrase.enabled}}
+                                    </label>
+                                </div>
+                                <div class="radio-list">
+                                    <label>
+                                        <input type="radio" name="discount_status" ng-model="form.discount_status" required value="0"> {{phrase.disabled}}
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group m-b-0">
+                            <div class="offset-sm-2 col-sm-10">
+                                <button type="submit" class="btn btn-info waves-effect waves-light" ng-disabled="editGrade.$invalid">{{phrase.editFeeDiscount}}</button>
+                            </div>
+                        </div>
+                    </form>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row" ng-show="views.show">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-block">
+                <button ng-click="changeView('list')" class="btn btn-danger btn-flat pull-right card-block-input-item">{{phrase.Return}}</button>
+                <h4 class="card-title">{{phrase.FeeDiscount}} : {{fee_discount.discount_name}}</h4>
+                <div class="table-responsive">
+
+                    <div>
+                        <!-- Nav tabs -->
+                        <ul class="nav nav-tabs tabsItem" role="tablist">
+                            <li class="nav-item" role="presentation"><a showtab="" class="nav-link active" href="#list" aria-controls="list" role="tab" data-toggle="tab">{{phrase.discAssign}}</a></li>
+                            <li class="nav-item" role="presentation"><a showtab="" class="nav-link" href="#addNew" aria-controls="addNew" role="tab" data-toggle="tab">{{phrase.addDiscAssign}}</a></li>
+                        </ul>
+
+                        <!-- Tab panes -->
+                        <div class="tab-content tabcontent-border">
+
+                            <div role="tabpanel" class="tab-pane active p-20" id="list">
+
+                                <table class="table table-bordered table-hover">
+                                    <tbody>
+                                        <tr>
+                                            <th>{{phrase.type}}</th>
+                                            <th>{{phrase.Information}}</th>
+                                        </tr>
+                                        <tr ng-repeat="(key,values) in fee_discount.discount_assignment | filter:searchText">
+                                            <td>{{key}}</td>
+                                            <td>
+                                                    <table class="table table-bordered table-hover" ng-show="key=='classes'">
+                                                        <tbody>
+                                                            <tr ng-repeat="(key_,value) in values">
+                                                                <td>{{phrase.class}} : {{value.classId}} - Section : {{value.sectionId}}</td>
+                                                                <td width="20">
+                                                                    <button ng-click="remove_assignment_item(key,key_,$index)" type="button" class="btn btn-danger btn-circle" title="{{phrase.Remove}}" tooltip><i class="fa fa-trash-o"></i></button>
+                                                                </td>
+                                                            </tr>
+                                                        </tbody>
+                                                    </table>
+                                                    <table class="table table-bordered table-hover" ng-show="key=='students'">
+                                                        <tbody>
+                                                            <tr ng-repeat="(key_,value) in values">
+                                                                <td>{{phrase.name}} : {{value.name}} [{{value.username}}] - {{phrase.email}} : {{value.email}}</td>
+                                                                <td width="20">
+                                                                    <button ng-click="remove_assignment_item(key,key_,$index)" type="button" class="btn btn-danger btn-circle" title="{{phrase.Remove}}" tooltip><i class="fa fa-trash-o"></i></button>
+                                                                </td>
+                                                            </tr>
+                                                        </tbody>
+                                                    </table>
+                                                    <table class="table table-bordered table-hover" ng-show="key=='invoices'">
+                                                        <tbody>
+                                                            <tr ng-repeat="(key_,value) in values">
+                                                                <td>{{phrase.title}} : {{value.paymentTitle}} - {{phrase.Description}} : {{value.paymentDescription}}</td>
+                                                                <td width="20">
+                                                                    <button ng-click="remove_assignment_item(key,key_,$index)" type="button" class="btn btn-danger btn-circle" title="{{phrase.Remove}}" tooltip><i class="fa fa-trash-o"></i></button>
+                                                                </td>
+                                                            </tr>
+                                                        </tbody>
+                                                    </table>
+                                            </td>
+                                        </tr>
+                                        <tr ng-show="fee_discount.discount_assignment == {}"><td class="noTableData" colspan="3">{{phrase.noDiscAssignAv}}</td></tr>
+                                    </tbody>
+                                </table>
+
+                            </div>
+                            <div role="tabpanel" class="tab-pane p-20" id="addNew">
+
+                                <form class="form-horizontal" name="addNewAssign" role="form" ng-submit="addAssToDiscount(fee_discount.id)" novalidate>
+                                    <div class="form-group row" ng-class="{'has-error': addNewAssign.discount_name.$invalid}">
+                                        <label class="col-sm-2 text-right control-label col-form-label">{{phrase.applyTo}} * </label>
+                                        <div class="col-sm-10">
+                                            <div class="radio-list">
+                                                <label>
+                                                    <input type="radio" name="apply_to" ng-model="new_ass.apply_to" required value="invoice"> {{phrase.Invoices}}
+                                                </label>
+                                            </div>
+                                            <div class="radio-list">
+                                                <label>
+                                                    <input type="radio" name="apply_to" ng-model="new_ass.apply_to" required value="class"> {{phrase.classes}}
+                                                </label>
+                                            </div>
+                                            <div class="radio-list">
+                                                <label>
+                                                    <input type="radio" name="apply_to" ng-model="new_ass.apply_to" required value="students"> {{phrase.specStudents}}
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="form-group row" ng-show="new_ass.apply_to == 'invoice'">
+                                        <label class="col-sm-2 text-right control-label col-form-label">{{phrase.Invoices}} </label>
+                                        <div class="col-sm-10">
+
+                                            <button type="button" ng-click="openSearch('invoices')" class="btn btn-danger btn-flat">{{phrase.selInvoices}}</button>
+
+                                            <div class="row">
+                                                <div class="col-md-8">
+                                                    <table class="table table-bordered table-hover">
+                                                        <tbody>
+                                                            <tr ng-repeat="invoice in new_ass.invoices">
+                                                                <td>
+                                                                    {{invoice.paymentTitle}} [{{invoice.paymentDescription}}]
+                                                                    <button type="button" ng-click="removeInvoice($index)" class="btn btn-danger pull-right btn-circle"><i class="fa fa-trash-o"></i></button>
+                                                                </td>
+                                                            </tr>
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+                                            </div>
+                                        
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group row" ng-show="new_ass.apply_to == 'class'" ng-class="{'has-error': addNewAssign.classId.$invalid}">
+                                        <label class="col-sm-2 text-right control-label col-form-label">{{phrase.class}} *</label>
+                                        <div class="col-sm-10">
+                                            <select class="form-control" ng-model="new_ass.classId" name="classId" ng-change="subjectList()" ng-required="new_ass.apply_to == 'class'">
+                                                <option ng-repeat="class in classes" value="{{class.id}}">{{class.className}}</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="form-group row" ng-show="new_ass.apply_to == 'class'" ng-class="{'has-error': addNewAssign.sectionId.$invalid}">
+                                        <label class="col-sm-2 text-right control-label col-form-label">{{phrase.sections}} *</label>
+                                        <div class="col-sm-10">
+                                            <select class="form-control" ng-model="new_ass.sectionId" name="sectionId" ng-required="new_ass.apply_to == 'class'">
+                                                <option ng-repeat="section in sections" value="{{section.id}}">{{section.sectionName}} - {{section.sectionTitle}}</option>
+                                            </select>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group row" ng-show="new_ass.apply_to == 'students'">
+                                        <label class="col-sm-2 text-right control-label col-form-label">{{phrase.students}} </label>
+                                        <div class="col-sm-10">
+
+                                            <button type="button" ng-click="openSearch('students')" class="btn btn-danger btn-flat">{{phrase.selectStudents}}</button>
+
+                                            <div class="row">
+                                                <div class="col-md-8">
+                                                    <table class="table table-bordered table-hover">
+                                                        <tbody>
+                                                            <tr ng-repeat="std in new_ass.students">
+                                                                <td>
+                                                                    {{std.name}} [{{std.username}}] - {{std.email}}
+                                                                    <button type="button" ng-click="removeStudent($index)" class="btn btn-danger pull-right btn-circle"><i class="fa fa-trash-o"></i></button>
+                                                                </td>
+                                                            </tr>
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+                                            </div>
+                                        
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="form-group m-b-0">
+                                        <div class="offset-sm-2 col-sm-10">
+                                            <button type="submit" class="btn btn-info waves-effect waves-light" ng-disabled="addNewAssign.$invalid">{{phrase.addDiscAssign}}</button>
+                                        </div>
+                                    </div>
+                                </form>
+
+                            </div>
+
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<modal visible="searchModal">
+    <div class="row" ng-show="searchPart == 'invoices'">
+        <div class="col-md-9">
+            <input type="text" class="form-control" id="searchInvText" placeholder="{{phrase.typeInvSearch}}">
+        </div>
+        <div class="col-md-2">
+            <button type="button" ng-click="ctrl_search('invoices')" class="btn btn-danger btn-flat">{{phrase.Search}}</button>
+        </div>
+    </div>
+
+    <div class="row" ng-show="searchPart == 'students'">
+        <div class="col-md-9">
+            <input type="text" class="form-control" id="searchStdText" placeholder="{{phrase.typeStdSearch}}">
+        </div>
+        <div class="col-md-2">
+            <button type="button" ng-click="ctrl_search('students')" class="btn btn-danger btn-flat">{{phrase.Search}}</button>
+        </div>
+    </div>
+    
+    <div class="row" ng-show="searchPart == 'invoices'">
+        <div class="col-md-12" style="padding-top:10px;">
+            <div class="box-body table-responsive">
+                <table class="table table-bordered">
+                    <tbody>
+                        <tr ng-repeat="inv in invoicesResults">
+                            <td>{{inv.paymentTitle}}</td>
+                            <td>{{inv.paymentDescription}}</td>
+                            <td class="no-print">
+                                <button type="button" ng-click="linkInvoice(inv)" class="btn btn-success btn-flat">{{phrase.select}}</button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="row" ng-show="searchPart == 'students'">
+        <div class="col-md-12" style="padding-top:10px;">
+            <div class="box-body table-responsive">
+                <table class="table table-bordered">
+                    <tbody>
+                        <tr ng-repeat="studentOne in studentsResults">
+                            <td>{{studentOne.name}} ( {{studentOne.username}} )</td>
+                            <td>{{studentOne.email}}</td>
+                            <td class="no-print">
+                                <button type="button" ng-click="linkStudent(studentOne)" class="btn btn-success btn-flat">{{phrase.select}}</button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</modal>

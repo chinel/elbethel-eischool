@@ -1,0 +1,329 @@
+<div class="row page-titles">
+    <div class="col-md-6 col-8 align-self-center">
+        <h3 class="text-themecolor m-b-0 m-t-0">{{phrase.FeeAllocation}}</h3>
+    </div>
+    <div class="col-md-6 col-4 align-self-center">
+
+    </div>
+</div>
+
+<div class="row" ng-show="views.list">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-block">
+                <button ng-show="$root.can('FeeAllocation.addFeeAllocation')" ng-click="changeView('add')" class="btn pull-right btn-success card-block-input-item">{{phrase.addFeeAllocation}}</button>
+                <div class="pull-right card-block-input-group card-block-input-item">
+                    <div class="input-group input-group-sm">
+                        <input type="text" name="table_search" ng-model="searchText" placeholder="{{phrase.Search}}" class="form-control">
+                        <span class="input-group-addon"><i class="fa fa-search"></i></span>
+                    </div>
+                </div>
+                <h4 class="card-title">{{phrase.listFeeAllocation}}</h4>
+                <div class="table-responsive">
+
+                    <table class="table table-bordered table-hover">
+                        <tbody>
+                            <tr>
+                                <th>{{phrase.feeTitle}}</th>
+                                <th>{{phrase.FeeGroup}}</th>
+                                <th>{{phrase.FeeType}}</th>
+                                <th>{{phrase.allocatedTo}}</th>
+                                <th style="width:120px;" ng-show="$root.can('FeeAllocation.editFeeAllocation') || $root.can('FeeAllocation.delFeeAllocation')">{{phrase.Operations}}</th>
+                            </tr>
+                            <tr ng-repeat="allocation in feeAllocation | filter:searchText">
+                                <td>{{allocation.feeTitle}}</td>
+                                <td>{{allocation.feeGroup}}</td>
+                                <td>{{allocation.feeType}}</td>
+                                <td>{{allocation.feeFor}}</td>
+                                <td style="width:120px;" ng-show="$root.can('FeeAllocation.editFeeAllocation') || $root.can('FeeAllocation.delFeeAllocation')">
+                                    <button ng-show="$root.can('FeeAllocation.editFeeAllocation')" ng-click="edit(allocation.id,'class')" type="button" class="btn btn-info btn-circle" title="{{phrase.Edit}}" tooltip><i class="fa fa-pencil"></i></button>
+                                    <button ng-show="$root.can('FeeAllocation.delFeeAllocation')" ng-click="remove(allocation,$index,'class')" type="button" class="btn btn-danger btn-circle" title="{{phrase.Remove}}" tooltip><i class="fa fa-trash-o"></i></button>
+                                </td>
+                            </tr>
+                            <tr ng-show="!feeAllocation.length"><td class="noTableData" colspan="6">{{phrase.noFeeAllocAv}}</td></tr>
+                        </tbody>
+                    </table>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row" ng-show="views.add">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-block">
+                <button ng-click="changeView('list')" class="btn btn-danger btn-flat pull-right card-block-input-item">{{phrase.cancelAdd}}</button>
+                <h4 class="card-title">{{phrase.addFeeAllocation}}</h4>
+                <div class="table-responsive">
+
+                    <form class="form-horizontal" name="addFeeAlloc" role="form" ng-submit="saveAdd()" novalidate>
+                        <div class="form-group row" ng-class="{'has-error': addFeeAlloc.feeTitle.$invalid}">
+                            <label class="col-sm-2 text-right control-label col-form-label">{{phrase.feeTitle}}* </label>
+                            <div class="col-sm-10">
+                                <input type="text" name="feeTitle" ng-model="form.feeTitle" class="form-control" required placeholder="{{phrase.feeTitle}}">
+                            </div>
+                        </div>
+                        <div class="form-group row" ng-class="{'has-error': addFeeAlloc.feeGroup.$invalid}">
+                            <label class="col-sm-2 text-right control-label col-form-label">{{phrase.FeeGroup}} * </label>
+                            <div class="col-sm-10">
+                                <select class="form-control" ng-model="form.feeGroup" name="feeGroup" required ng-change="loadFeeTypes()">
+                                    <option ng-repeat="group in feeGroups" value="{{group.id}}">{{group.group_title}}</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group row" ng-class="{'has-error': addFeeAlloc.feeType.$invalid}">
+                            <label class="col-sm-2 text-right control-label col-form-label">{{phrase.FeeType}} * </label>
+                            <div class="col-sm-10">
+                                <select class="form-control" ng-model="form.feeType" name="feeType" required>
+                                    <option ng-repeat="type in feeTypes" value="{{type.id}}">{{type.feeTitle}}</option>
+                                </select>
+                                <div class="box bg-light-info" style="margin-top:10px;" ng-show="form.feeType">
+                                    {{phrase.Description}}: {{feeTypes[form.feeType].feeDescription}} <br/>
+                                    {{phrase.Amount}}: {{feeTypes[form.feeType].feeAmount}} <br/>
+                                    {{phrase.feeCode}}: {{feeTypes[form.feeType].feeCode}} <br/>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group row" ng-class="{'has-error': addFeeAlloc.feeFor.$invalid}">
+                            <label class="col-sm-2 text-right control-label col-form-label">{{phrase.allocatedTo}} * </label>
+                            <div class="col-sm-10">
+                                <div class="radio-list">
+                                    <label>
+                                        <input type="radio" name="feeFor" value="all" ng-model="form.feeFor" required>
+                                        {{phrase.allStudents}}
+                                    </label>
+                                </div>
+                                <div class="radio-list">
+                                    <label>
+                                        <input type="radio" name="feeFor" value="class" ng-model="form.feeFor" required>
+                                        {{phrase.class}}
+                                    </label>
+                                </div>
+                                <div class="radio-list">
+                                    <label>
+                                        <input type="radio" name="feeFor" value="student" ng-model="form.feeFor" required>
+                                        {{phrase.specStudents}}
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="card card-outline-info" style="border: 1px solid #009efb;" ng-show="form.feeFor == 'class' || form.feeFor =='student'" ng-class="{'has-error': addGrade.feeSchDetails.$invalid}">
+                            <div class="card-header">
+                                <h4 class="m-b-0 text-white">{{phrase.feeAllocDetails}}</h4>
+                            </div>
+                            <div class="card-block">
+
+                                <div class="form-group row" ng-class="{'has-error': addFeeAlloc.allocationId.$invalid}" ng-show="form.feeFor == 'class'">
+                                    <label class="col-sm-2 text-right control-label col-form-label">{{phrase.class}} * </label>
+                                    <div class="col-sm-10">
+                                        <select class="form-control" ng-model="form.feeSchDetailsClass" name="class" ng-required="form.feeFor == 'class'" ng-change="subjectList()">
+                                            <option ng-repeat="(key,value) in classes" value="{{key}}">{{value}}</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="form-group row" ng-class="{'has-error': addFeeAlloc.sectionId.$invalid}" ng-show="form.feeFor == 'class' && $root.dashboardData.enableSections == '1'">
+                                    <label class="col-sm-2 text-right control-label col-form-label">{{phrase.section}} *</label>
+                                    <div class="col-sm-10">
+                                        <select class="form-control" ng-model="form.feeSchDetailsClassSection" name="section" multiple ng-required="(form.userType == 'students' || form.userType == 'parents') && $root.dashboardData.enableSections == '1'">
+                                            <option ng-repeat="section in sections" value="{{section.id}}">{{section.sectionName}} - {{section.sectionTitle}}</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="form-group row" ng-class="{'has-error': addFeeAlloc.allocationId.$invalid}" ng-show="form.feeFor == 'student'">
+                                    <label class="col-sm-2 text-right control-label col-form-label">{{phrase.student}} * </label>
+                                    <div class="col-sm-10">
+                                        <button type="button" ng-click="linkStudent()" class="btn btn-danger btn-flat">{{phrase.searchUsers}}</button>
+                                        <small>{{phrase.paymentSelectMultiple}}</small>
+
+                                        <table class="table table-bordered">
+                                            <tr ng-repeat="student in form.feeSchDetailsStudents track by $index">
+                                                <td>{{student.name}}</td>
+                                                <td>
+                                                    <button type="button" ng-click="removeStudent(student.id)" class="btn btn-danger btn-circle"><i class="fa fa-trash-o"></i></button>
+                                                </td>
+                                            </tr>
+                                        </table>
+
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+                        <div class="form-group row" ng-class="{'has-error': addFeeAlloc.generateWhen.$invalid}">
+                            <label class="col-sm-2 text-right control-label col-form-label">{{phrase.feeAllocWhenFrst}} * </label>
+                            <div class="col-sm-10">
+                                <div class="radio-list">
+                                    <label>
+                                        <input type="radio" name="generateWhen" value="now" ng-model="form.generateWhen" required>
+                                        {{phrase.Now}}
+                                    </label>
+                                </div>
+                                <div class="radio-list">
+                                    <label>
+                                        <input type="radio" name="generateWhen" value="fee_type" ng-model="form.generateWhen" required>
+                                        {{phrase.arFeeTypeDates}}
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group m-b-0">
+                            <div class="offset-sm-2 col-sm-10">
+                                <button type="submit" class="btn btn-info waves-effect waves-light" ng-disabled="addFeeAlloc.$invalid">{{phrase.addFeeAllocation}}</button>
+                            </div>
+                        </div>
+                    </form>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row" ng-show="views.edit">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-block">
+                <button ng-click="changeView('list')" class="btn btn-danger btn-flat pull-right card-block-input-item">{{phrase.cancelEdit}}</button>
+                <h4 class="card-title">{{phrase.editFeeAllocation}}</h4>
+                <div class="table-responsive">
+
+                    <form class="form-horizontal" name="editFeeAlloc" role="form" ng-submit="saveEdit()" novalidate>
+                        <div class="form-group row" ng-class="{'has-error': editFeeAlloc.feeTitle.$invalid}">
+                            <label class="col-sm-2 text-right control-label col-form-label">{{phrase.feeTitle}}* </label>
+                            <div class="col-sm-10">
+                                <input type="text" name="feeTitle" ng-model="form.feeTitle" class="form-control" required placeholder="{{phrase.feeTitle}}">
+                            </div>
+                        </div>
+                        <div class="form-group row" ng-class="{'has-error': editFeeAlloc.feeGroup.$invalid}">
+                            <label class="col-sm-2 text-right control-label col-form-label">{{phrase.FeeGroup}} * </label>
+                            <div class="col-sm-10">
+                                <select class="form-control" ng-model="form.feeGroup" name="feeGroup" required ng-change="loadFeeTypes()">
+                                    <option ng-repeat="group in feeGroups" value="{{group.id}}">{{group.group_title}}</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group row" ng-class="{'has-error': editFeeAlloc.feeType.$invalid}">
+                            <label class="col-sm-2 text-right control-label col-form-label">{{phrase.FeeType}} * </label>
+                            <div class="col-sm-10">
+                                <select class="form-control" ng-model="form.feeType" name="feeType" required>
+                                    <option ng-repeat="type in feeTypes" value="{{type.id}}">{{type.feeTitle}}</option>
+                                </select>
+                                <div class="box bg-light-info" style="margin-top:10px;" ng-show="form.feeType">
+                                    {{phrase.Description}}: {{feeTypes[form.feeType].feeDescription}} <br/>
+                                    {{phrase.Amount}}: {{feeTypes[form.feeType].feeAmount}} <br/>
+                                    {{phrase.feeCode}}: {{feeTypes[form.feeType].feeCode}} <br/>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group row" ng-class="{'has-error': editFeeAlloc.feeFor.$invalid}">
+                            <label class="col-sm-2 text-right control-label col-form-label">{{phrase.allocatedTo}} * </label>
+                            <div class="col-sm-10">
+                                <div class="radio-list">
+                                    <label>
+                                        <input type="radio" name="feeFor" value="all" ng-model="form.feeFor" required>
+                                        {{phrase.allStudents}}
+                                    </label>
+                                </div>
+                                <div class="radio-list">
+                                    <label>
+                                        <input type="radio" name="feeFor" value="class" ng-model="form.feeFor" required>
+                                        {{phrase.class}}
+                                    </label>
+                                </div>
+                                <div class="radio-list">
+                                    <label>
+                                        <input type="radio" name="feeFor" value="student" ng-model="form.feeFor" required>
+                                        {{phrase.specStudents}}
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="card card-outline-info" style="border: 1px solid #009efb;" ng-show="form.feeFor == 'class' || form.feeFor =='student'" ng-class="{'has-error': addGrade.feeSchDetails.$invalid}">
+                            <div class="card-header">
+                                <h4 class="m-b-0 text-white">{{phrase.feeAllocDetails}}</h4>
+                            </div>
+                            <div class="card-block">
+
+                                <div class="form-group row" ng-class="{'has-error': editFeeAlloc.allocationId.$invalid}" ng-show="form.feeFor == 'class'">
+                                    <label class="col-sm-2 text-right control-label col-form-label">{{phrase.class}} * </label>
+                                    <div class="col-sm-10">
+                                        <select class="form-control" ng-model="form.feeSchDetailsClass" name="class" ng-required="form.feeFor == 'class'" ng-change="subjectList()">
+                                            <option ng-repeat="(key,value) in classes" value="{{key}}">{{value}}</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="form-group row" ng-class="{'has-error': editFeeAlloc.sectionId.$invalid}" ng-show="form.feeFor == 'class' && $root.dashboardData.enableSections == '1'">
+                                    <label class="col-sm-2 text-right control-label col-form-label">{{phrase.section}} *</label>
+                                    <div class="col-sm-10">
+                                        <select class="form-control" ng-model="form.feeSchDetailsClassSection" name="section" multiple ng-required="(form.userType == 'students' || form.userType == 'parents') && $root.dashboardData.enableSections == '1'">
+                                            <option ng-repeat="section in sections" value="{{section.id}}" ng-selected="isSectionSelected(form.feeSchDetailsClassSection,section.id)">{{section.sectionName}} - {{section.sectionTitle}}</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="form-group row" ng-class="{'has-error': editFeeAlloc.allocationId.$invalid}" ng-show="form.feeFor == 'student'">
+                                    <label class="col-sm-2 text-right control-label col-form-label">{{phrase.student}} * </label>
+                                    <div class="col-sm-10">
+                                        <button type="button" ng-click="linkStudent()" class="btn btn-danger btn-flat">{{phrase.searchUsers}}</button>
+                                        <small>{{phrase.paymentSelectMultiple}}</small>
+
+                                        <table class="table table-bordered">
+                                            <tr ng-repeat="student in form.feeSchDetailsStudents track by $index">
+                                                <td>{{student.name}}</td>
+                                                <td>
+                                                    <button type="button" ng-click="removeStudent(student.id)" class="btn btn-danger btn-circle"><i class="fa fa-trash-o"></i></button>
+                                                </td>
+                                            </tr>
+                                        </table>
+
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+                        <div class="form-group m-b-0">
+                            <div class="offset-sm-2 col-sm-10">
+                                <button type="submit" class="btn btn-info waves-effect waves-light" ng-disabled="editFeeAlloc.$invalid">{{phrase.editFeeAllocation}}</button>
+                            </div>
+                        </div>
+                    </form>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<modal visible="showModal"><div ng-bind-html="modalContent"></div></modal>
+<modal visible="showModalLink">
+    <div class="row">
+        <div class="col-md-9">
+            <input type="text" class="form-control" id="searchLink" placeholder="{{phrase.typeNameUserMail}}">
+        </div>
+        <div class="col-md-2">
+            <button type="button" ng-click="linkStudentButton()" class="btn btn-danger btn-flat">{{phrase.Search}}</button>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-12" style="padding-top:10px;">
+            <div class="box-body table-responsive">
+                <table class="table table-bordered">
+                    <tbody>
+                        <tr ng-repeat="studentOne in searchResults">
+                            <td>{{studentOne.name}}</td>
+                            <td>{{studentOne.email}}</td>
+                            <td class="no-print">
+                                <button type="button" ng-click="linkStudentFinish(studentOne)" class="btn btn-success btn-flat">{{phrase.select}}</button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</modal>
